@@ -1,0 +1,18 @@
+SYNTHETIC PAYER POLICY — TIMELY FILING (Policy ID: TF-405)
+Section 1: Standard
+Claims must be received within 90 days of the date of service. Claims
+received after this window are denied under code CO-29 (timely filing
+limit exceeded).
+
+Section 2: Appeal Requirements
+An appeal must demonstrate either (a) the claim was originally submitted
+within the filing window, with proof of timely submission such as a
+clearinghouse acceptance report, or (b) a qualifying exception applied
+(e.g., delayed eligibility determination, retroactive enrollment, or payer
+system outage). The AI assistant must not fabricate a submission date or
+confirmation number — it may only cite proof-of-timely-filing evidence that
+was actually supplied.
+
+Section 3: Exceptions
+Exceptions to timely filing are evaluated case by case and require
+documented proof. This is synthetic demo data.

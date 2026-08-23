@@ -1,0 +1,4 @@
+Synthetic Evidence — CLM-1017
+Clinical summary: supporting records in this demo are incomplete.
+Medical necessity review: current evidence does not establish the threshold for the billed level of care.
+Missing item: detailed clinical justification.

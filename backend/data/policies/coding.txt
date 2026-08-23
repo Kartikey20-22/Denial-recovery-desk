@@ -1,0 +1,18 @@
+SYNTHETIC PAYER POLICY — CODING & BILLING EDITS (Policy ID: CD-330)
+Section 1: Standard
+Claims are denied under code CO-16/CO-11 when submitted CPT/HCPCS or ICD-10
+codes are inconsistent, mismatched with the diagnosis, or fail a payer
+coding edit (e.g., NCCI bundling edits).
+
+Section 2: Appeal Requirements
+A coding-error appeal must identify the specific code(s) in question and
+explain, using only the documentation on file, why the original coding was
+correct or what corrected coding is supported by the medical record. The AI
+must never invent a corrected CPT/ICD code that is not present in the
+source documentation — it may only cite codes/documentation actually
+supplied. If the correct code is unclear, the appeal should request a
+coding review from a certified coder rather than guessing.
+
+Section 3: Documentation
+Operative notes, progress notes, and itemized charge detail should
+accompany any coding appeal. This is synthetic demo data.

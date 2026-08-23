@@ -1,0 +1,6 @@
+SYNTHETIC EVIDENCE — Prior Authorization Request Log
+Claim: CLM-1005
+No authorization request was found in the provider's records prior to the
+date of service. This is a high-value claim; the case file does not
+currently contain evidence establishing clinical urgency or a retroactive
+authorization request. This is synthetic demo data.

@@ -1,0 +1,4 @@
+Synthetic Evidence — CLM-1016
+CPT: 99214
+Issue: same diagnosis/procedure pairing pattern as another synthetic coding case.
+Coding reviewer note: corrected coding can support reconsideration if the payer rule permits corrected claims.

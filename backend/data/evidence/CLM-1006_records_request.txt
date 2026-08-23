@@ -1,0 +1,6 @@
+SYNTHETIC EVIDENCE — Records Request Tracking
+Claim: CLM-1006
+Payer requested supporting medical records on file; provider's records
+department has not yet located a corresponding submission confirmation.
+The itemized chart notes have now been pulled and are attached for
+resubmission. This is synthetic demo data.

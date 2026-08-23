@@ -1,0 +1,6 @@
+SYNTHETIC EVIDENCE — Internal Coding Review
+Claim: CLM-1002
+Certified coder reviewed the operative note and confirmed the CPT code
+originally billed matches the documented procedure. The mismatch flagged
+by the payer appears to be a diagnosis-pointer sequencing issue rather
+than an incorrect procedure code. This is synthetic demo data.

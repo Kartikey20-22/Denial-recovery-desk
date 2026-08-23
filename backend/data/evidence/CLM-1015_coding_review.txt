@@ -1,0 +1,4 @@
+Synthetic Evidence — CLM-1015
+CPT: 99214
+Issue: diagnosis/procedure pairing mismatch.
+Coding reviewer note: verify the diagnosis pointer and payer-specific coding edits before appeal.

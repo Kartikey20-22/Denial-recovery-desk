@@ -1,0 +1,7 @@
+Synthetic Evidence — CLM-1014
+Patient reference: PAT-DUP-013
+Payer: ABC Insurance Co.
+Billed amount: 7800
+Service: outpatient procedure
+Duplicate check: CLM-1013 has the same synthetic patient, payer, amount and service pattern.
+Recommendation: retrieve the prior adjudication record and determine whether this is a true duplicate or a corrected resubmission.

@@ -1,0 +1,16 @@
+SYNTHETIC PAYER POLICY — ELIGIBILITY (Policy ID: EL-512)
+Section 1: Standard
+Services rendered to a member who was not active on the plan on the date
+of service are denied under code CO-27 (coverage terminated) or CO-31
+(patient cannot be identified as insured).
+
+Section 2: Appeal Requirements
+An eligibility appeal must include proof of active coverage on the date of
+service (e.g., an eligibility verification record, retroactive enrollment
+confirmation, or corrected member ID). The AI assistant must never invent
+a member ID, group number, or coverage effective date — it may only cite
+eligibility evidence actually supplied in the case file.
+
+Section 3: Retroactive Eligibility
+Retroactive eligibility changes (e.g., Medicaid backdating) may support an
+appeal when documented by the plan sponsor. This is synthetic demo data.

@@ -1,0 +1,16 @@
+SYNTHETIC PAYER POLICY — MISSING DOCUMENTATION (Policy ID: MD-715)
+Section 1: Standard
+Claims denied under code CO-M127 indicate the payer did not receive
+requested supporting documentation (e.g., operative report, progress
+notes, itemized bill) within the required timeframe.
+
+Section 2: Appeal Requirements
+An appeal must be accompanied by the specific documentation originally
+requested. If that documentation is not available in the case file, the
+appeal must state plainly which records are still missing rather than
+asserting the record was submitted. The AI assistant must never claim
+documentation was sent if it was not actually supplied as evidence.
+
+Section 3: Resubmission Window
+Payers generally allow 45 days from the request date to submit missing
+records. This is synthetic demo data.

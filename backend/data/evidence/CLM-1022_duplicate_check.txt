@@ -1,0 +1,3 @@
+Synthetic Evidence — CLM-1022
+Payer duplicate indicator: true for one submitted line item.
+Action: compare the line against the previous adjudication and determine whether the submission was a corrected claim.

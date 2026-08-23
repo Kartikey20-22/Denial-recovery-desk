@@ -1,0 +1,6 @@
+SYNTHETIC EVIDENCE — Clinical Note Excerpt
+Claim: CLM-1001
+Patient presented with symptoms requiring the billed procedure on an
+urgent basis. Treating provider documented clinical urgency in the chart
+note as the reason the procedure could not be delayed pending standard
+authorization turnaround. This is synthetic demo data.

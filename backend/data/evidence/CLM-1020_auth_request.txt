@@ -1,0 +1,5 @@
+Synthetic Evidence — CLM-1020
+Authorization reference: AUTH-DEMO-1020
+Authorization status: approved before service.
+Issue: reference was not linked to the claim packet.
+Action: attach the authorization record and request reconsideration.

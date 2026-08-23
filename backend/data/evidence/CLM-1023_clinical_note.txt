@@ -1,0 +1,3 @@
+Synthetic Evidence — CLM-1023
+Medical necessity packet: partial clinical documentation only.
+Missing item: additional records supporting the requested level of care.

@@ -1,0 +1,20 @@
+SYNTHETIC PAYER POLICY — MEDICAL NECESSITY (Policy ID: MN-210)
+Section 1: Standard
+Services are covered only when medical necessity is supported by clinical
+documentation consistent with nationally recognized guidelines. Denials
+under code CO-50 indicate the submitted documentation did not establish
+necessity for the level of care billed.
+
+Section 2: Appeal Requirements
+A medical-necessity appeal must reference specific clinical evidence
+(diagnosis, symptoms, prior treatment failures, or objective findings)
+already present in the member's chart. The AI assistant must never invent
+clinical facts, lab values, or diagnoses that are not present in the
+supplied evidence. If supporting clinical documentation is not available,
+the appeal must explicitly say documentation is missing and request it
+from the treating provider before submission.
+
+Section 3: Peer-to-Peer Review
+Providers may request a peer-to-peer review with the payer's medical
+director as an alternative or supplement to a written appeal. This is
+synthetic demo data.

@@ -1,0 +1,6 @@
+SYNTHETIC EVIDENCE — Clearinghouse Acceptance Report
+Claim: CLM-1004
+Clearinghouse transmission log shows the claim was accepted for
+transmission to the payer within the 90-day timely filing window. The
+payer's rejection appears to reflect a delay on the payer's end after
+acceptance. This is synthetic demo data.

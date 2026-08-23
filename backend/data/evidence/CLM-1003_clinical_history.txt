@@ -1,0 +1,6 @@
+SYNTHETIC EVIDENCE — Clinical History Summary
+Claim: CLM-1003
+Chart notes show two prior conservative treatments failed over the
+preceding 8 weeks before the billed service was performed, consistent
+with step-therapy requirements referenced in payer medical policy. This
+is synthetic demo data.

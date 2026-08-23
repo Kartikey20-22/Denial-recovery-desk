@@ -1,0 +1,29 @@
+import React,{useCallback,useEffect,useState} from "react";
+import {api} from "./api";
+import {useToast} from "./Toast";
+import Auth from "./components/Auth";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
+import Queue from "./components/Queue";
+import ReviewQueue from "./components/ReviewQueue";
+import CaseDetail from "./components/CaseDetail";
+import UploadModal from "./components/UploadModal";
+import WorkspacePage from "./components/WorkspacePage";
+import Icon from "./icons";
+import Copilot from "./components/Copilot";
+const TITLES={dashboard:"Dashboard",denials:"Denials",claims:"Claims",documents:"Documents",appeals:"Appeals",insights:"AI Insights",rules:"Payer Rules",reports:"Reports",users:"Users",settings:"Settings",notifications:"Notifications",copilot:"AI Copilot"};
+export default function App(){
+ const [logged,setLogged]=useState(!!localStorage.getItem("token")); const [tab,setTab]=useState("dashboard"); const [stats,setStats]=useState(null),[breakdown,setBreakdown]=useState(null),[rows,setRows]=useState([]),[tasks,setTasks]=useState([]),[notifications,setNotifications]=useState([]),[operations,setOperations]=useState(null),[learning,setLearning]=useState([]); const [filters,setFilters]=useState({status:"",reason:"",q:""}); const [loading,setLoading]=useState(false),[selectedId,setSelectedId]=useState(null),[upload,setUpload]=useState(false),[health,setHealth]=useState(null); const toast=useToast();
+ const loadCore=useCallback(async()=>{try{const [s,b,r,t,n,o,l]=await Promise.all([api.stats(),api.breakdown(),api.denials(),api.reviewQueue(),api.notifications(),api.operations(),api.learning()]);setStats(s);setBreakdown(b);setRows(r);setTasks(t);setNotifications(n);setOperations(o);setLearning(l)}catch(e){if(e.status===401){localStorage.clear();setLogged(false)}}},[]);
+ const loadQueue=useCallback(async(f=filters)=>{setLoading(true);try{setRows(await api.denials(f))}finally{setLoading(false)}},[filters]);
+ useEffect(()=>{if(!logged)return;loadCore();api.health().then(setHealth).catch(()=>setHealth(null))},[logged,loadCore]);
+ useEffect(()=>{if(logged&&(tab==='denials'||tab==='claims'))loadQueue(filters)},[filters.status,filters.reason]);
+ if(!logged)return <Auth onLogin={()=>setLogged(true)}/>;
+ const open=(id)=>{setSelectedId(id);setTab('case')};
+ const navigate=(t)=>{if(t==='case')return;setTab(t);if(t==='denials'||t==='claims')loadQueue(filters)};
+ const review=async(id,decision)=>{await api.reviewDenial(id,decision,"Reviewed via Recovery Desk");await loadCore()};
+ const logout=()=>{localStorage.clear();setLogged(false)};
+ const quick=(x)=>{if(x==='create'||x==='track')return navigate('denials'); if(x==='appeals'||x==='rules'||x==='reports'||x==='notifications')return navigate(x);setUpload(true)};
+ return <div className="appShell"><Sidebar tab={tab} setTab={navigate} onUpload={()=>setUpload(true)} onLogout={logout} reviewCount={tasks.length} health={health}/><main className="main"><header className="topbar"><div className="searchBox"><Icon name="search" size={18}/><input placeholder="Search claims, patients, denial reasons…" onKeyDown={e=>{if(e.key==='Enter'){setFilters({...filters,q:e.currentTarget.value});navigate('denials')}}}/></div><div className="topRight"><div className="dateBtn demoRange"><Icon name="calendar" size={16}/>Demo dataset · Last 45 days</div><button className="bell" title="Open notifications" onClick={()=>navigate("notifications")}><Icon name="bell" size={18}/><i>{notifications.filter(n=>!n.read).length}</i></button><div className="userMenu"><div className="avatar">PS</div><div><b>Priya Sharma</b><small>Admin</small></div><Icon name="chevron" size={14}/></div></div></header>{tab!=='copilot'&&<div className="pageHead"><div><h1>{TITLES[tab]||'Recovery Desk'}</h1><p>{tab==='dashboard'?"Welcome back, Priya! Here's what's happening with your denials.":"Manage the AI-powered denial recovery lifecycle."}</p></div><div className={`aiPill ${health?'online':'offline'}`}><span/> {health?'Local AI Online':'Fallback Ready'}</div></div>}
+ {tab==='copilot'&&<Copilot/>} {tab==='dashboard'&&<Dashboard stats={stats} breakdown={breakdown} rows={rows} open={open} goQueue={quick} notifications={notifications} operations={operations} learning={learning} onBatch={async()=>{const r=await api.batchAnalyze(null,25);setOperations(await api.operations());toast(`Batch ${r.run_id}: ${r.completed} completed, ${r.failed} failed.`,r.failed?"warn":"good");loadCore()}}/>} {tab==='denials'&&<Queue rows={rows} loading={loading} filters={filters} setFilters={setFilters} onSearch={q=>{const f={...filters,q};setFilters(f);loadQueue(f)}} open={open}/>} {tab==='claims'&&<Queue rows={rows} loading={loading} filters={filters} setFilters={setFilters} onSearch={q=>{const f={...filters,q};setFilters(f);loadQueue(f)}} open={open}/>} {tab==='appeals'&&<WorkspacePage type="appeals" open={open}/>} {tab==='documents'&&<WorkspacePage type="documents" open={open} onUpload={()=>setUpload(true)}/>} {tab==='rules'&&<WorkspacePage type="rules" open={open}/>} {tab==='users'&&<WorkspacePage type="users" open={open}/>} {tab==='notifications'&&<WorkspacePage type="notifications" open={open}/>} {tab==='insights'&&<WorkspacePage type="insights" open={open}/>} {tab==='reports'&&<WorkspacePage type="reports" open={open}/>} {tab==='settings'&&<WorkspacePage type="settings" open={open}/>} {tab==='review'&&<ReviewQueue tasks={tasks} open={open} review={(id,d)=>review(id,d).then(()=>toast(d==='APPROVE'?'Approved.':'Updated.',d==='APPROVE'?'good':'info'))}/>} {tab==='case'&&selectedId&&<CaseDetail id={selectedId} onBack={()=>setTab('denials')} onRefresh={loadCore} review={review}/>}</main>{upload&&<UploadModal onClose={()=>setUpload(false)} onDone={id=>{setUpload(false);loadCore();open(id)}}/>}</div>
+}

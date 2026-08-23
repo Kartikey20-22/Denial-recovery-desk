@@ -1,0 +1,20 @@
+SYNTHETIC PAYER POLICY — PRIOR AUTHORIZATION (Policy ID: PA-100)
+Section 1: Requirement
+All non-emergency procedures listed in Appendix A require prior authorization
+before the date of service. Claims submitted without a valid authorization
+number on file will be denied under code CO-197.
+
+Section 2: Appeal Requirements
+An appeal for a missing prior-authorization denial must include:
+  - The original authorization request date, if one was submitted.
+  - Proof of medical necessity from the treating provider.
+  - Confirmation that the service rendered matches the authorization request.
+Reviewers must NOT fabricate an authorization number. If no authorization
+was ever requested, the appeal must state that a retroactive authorization
+is being requested and explain the clinical urgency that prevented a
+pre-service request.
+
+Section 3: Retroactive Review
+Retroactive authorization may be granted for emergent services or when the
+member's eligibility was not known at time of service. This is synthetic
+demo data and does not reflect any real payer's policy.

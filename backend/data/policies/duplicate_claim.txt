@@ -1,0 +1,16 @@
+SYNTHETIC PAYER POLICY — DUPLICATE CLAIM (Policy ID: DC-620)
+Section 1: Standard
+A claim is denied under code CO-18 when the payer's system identifies it
+as a duplicate of a previously processed claim for the same member,
+provider, date of service, and procedure.
+
+Section 2: Appeal Requirements
+A duplicate-claim appeal must show the two claims are not in fact
+duplicates — for example, different procedures, different dates of
+service, or a corrected/replacement claim submitted per payer
+instructions. The AI assistant must not invent claim numbers or dates; it
+may only reference claim identifiers actually present in the case data.
+
+Section 3: Corrected Claims
+Corrected claims must be submitted with the appropriate frequency code and
+reference the original claim number. This is synthetic demo data.

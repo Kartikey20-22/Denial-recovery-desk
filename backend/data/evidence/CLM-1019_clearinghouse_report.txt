@@ -1,0 +1,3 @@
+Synthetic Evidence — CLM-1019
+Clearinghouse receipt: payer received the claim after the synthetic timely-filing window.
+Action: verify original submission timestamp and any accepted-file exception before appeal.

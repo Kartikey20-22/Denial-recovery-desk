@@ -1,0 +1,7 @@
+SYNTHETIC EVIDENCE — Prior Authorization Request Log
+Claim: CLM-1001
+Provider submitted an authorization request for the billed procedure two
+days before the date of service via the payer's provider portal. The
+portal generated a pending confirmation number but no approval was
+received before the service was rendered due to a documented payer
+system outage on that date. This is synthetic demo data.

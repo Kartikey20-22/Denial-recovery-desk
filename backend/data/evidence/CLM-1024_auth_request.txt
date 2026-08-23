@@ -1,0 +1,5 @@
+Synthetic Evidence — CLM-1024
+Authorization reference: AUTH-DEMO-1024
+Authorization status: approved before service.
+Issue: the claim record did not include the authorization reference.
+Action: attach this evidence before reconsideration.
