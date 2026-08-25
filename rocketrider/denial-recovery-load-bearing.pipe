@@ -11,14 +11,7 @@
         "type": "webhook",
         "name": "Webhook"
       },
-      "ui": {
-        "position": {
-          "x": 170,
-          "y": 300
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 100, "y": 300 }, "nodeType": "default", "formDataValid": true }
     },
     {
       "id": "embedding_transformer_1",
@@ -27,24 +20,10 @@
       "config": {
         "profile": "miniLM",
         "name": "Transformer",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 390,
-          "y": 470
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "questions",
-          "from": "webhook_1"
-        }
-      ]
+      "ui": { "position": { "x": 280, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "webhook_1" }]
     },
     {
       "id": "llm_ollama_1",
@@ -52,31 +31,13 @@
       "name": "Denial Classifier",
       "config": {
         "profile": "llama3_1-8b",
-        "llama3_1-8b": {
-          "serverbase": "http://localhost:11434/v1"
-        },
-        "llama3_3": {
-          "serverbase": "http://localhost:11434/v1"
-        },
+        "llama3_1-8b": { "serverbase": "http://localhost:11434/v1" },
+        "llama3_3": { "serverbase": "http://localhost:11434/v1" },
         "name": "Ollama",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 390,
-          "y": 230
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "questions",
-          "from": "embedding_transformer_1"
-        }
-      ]
+      "ui": { "position": { "x": 460, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "embedding_transformer_1" }]
     },
     {
       "id": "db_postgres_1",
@@ -87,7 +48,7 @@
         "default": {
           "allow_execute": false,
           "database": "denial_recovery",
-          "db_description": "PostgreSQL database containing insurance denial records, claims, payer information, denial reasons, appeal history, recovery status, and payment outcomes. Used by the Denial Recovery Desk to retrieve complete denial context for classification, evidence analysis, appeal generation, human review, and recovery tracking.",
+          "db_description": "PostgreSQL database containing insurance denial records, claims, payer information, denial reasons, appeal history, recovery status, and payment outcomes. Used to retrieve complete denial context for classification, evidence analysis, appeal generation, human review, and recovery tracking.",
           "host": "localhost",
           "max_attempts": 5,
           "table": "denials",
@@ -95,120 +56,25 @@
           "password": "postgres"
         },
         "name": "PostgreSQL",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 540,
-          "y": 290
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 640, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "llm_ollama_1" }]
     },
     {
       "id": "agent_langchain_1",
       "provider": "agent_langchain",
       "name": "Payer Policy RAG",
       "config": {
-        "agent_description": "Retrieves and analyzes payer-specific policies, coverage rules, denial guidelines, authorization requirements, medical necessity criteria, coding rules, and appeal requirements relevant to an insurance denial. It uses the denial context and payer information to identify the most relevant policy evidence for downstream appeal generation and recovery decisions.",
+        "agent_description": "Retrieves and analyzes payer-specific policies, coverage rules, denial guidelines, authorization requirements, medical necessity criteria, coding rules, and appeal requirements relevant to an insurance denial. Uses denial context and payer information to identify relevant policy evidence for downstream appeal generation and recovery decisions.",
         "instructions": [
           "You are the Payer Policy Research Agent for the Denial Recovery Desk.\n\nAnalyze the incoming denial context and identify the payer, denial reason, denial code, procedure or service, and relevant claim details.\n\nRetrieve and use only relevant payer policy and coverage information available to you.\n\nReturn:\n1. Payer name\n2. Relevant policy or guideline\n3. Applicable coverage or authorization rule\n4. Denial-specific requirement\n5. Evidence supporting or contradicting the denial\n6. Recommended policy-based appeal argument\n7. Source or policy reference when available\n\nDo not invent policy numbers, coverage rules, citations, or evidence. If relevant policy information is unavailable, explicitly state that it is unavailable.\n\nPrioritize accurate, denial-specific evidence over generic healthcare information."
         ],
         "name": "LangChain",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 760,
-          "y": 380
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
-    },
-    {
-      "id": "llm_ollama_2",
-      "provider": "llm_ollama",
-      "name": "Appeal Draft Generator",
-      "config": {
-        "profile": "llama3_1-8b",
-        "llama3_1-8b": {
-          "serverbase": "http://localhost:11434/v1"
-        },
-        "llama3_3": {
-          "serverbase": "http://localhost:11434/v1"
-        },
-        "name": "Ollama",
-        "parameters": {
-          "google": {}
-        }
-      },
-      "ui": {
-        "position": {
-          "x": 910,
-          "y": 280
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
-    },
-    {
-      "id": "guardrails_1",
-      "provider": "guardrails",
-      "name": "Human Review Guardrails",
-      "config": {
-        "profile": "basic",
-        "basic": {
-          "policy_mode": "block"
-        },
-        "name": "Guardrails",
-        "parameters": {
-          "google": {}
-        }
-      },
-      "ui": {
-        "position": {
-          "x": 1070,
-          "y": 390
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
-    },
-    {
-      "id": "db_postgres_2",
-      "provider": "db_postgres",
-      "name": "Denial Recovery Database",
-      "config": {
-        "profile": "default",
-        "default": {
-          "allow_execute": false,
-          "database": "denial_recovery",
-          "db_description": "Stores denial records and workflow data for the Denial Recovery system.",
-          "host": "localhost",
-          "max_attempts": 5,
-          "table": "denials",
-          "user": "postgres",
-          "password": "postgres"
-        },
-        "name": "PostgreSQL",
-        "parameters": {
-          "google": {}
-        }
-      },
-      "ui": {
-        "position": {
-          "x": 1220,
-          "y": 240
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 820, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "db_postgres_1" }]
     },
     {
       "id": "agent_langchain_2",
@@ -217,21 +83,26 @@
       "config": {
         "agent_description": "Generates an evidence-based appeal draft using the denial reason, claim data, payer policy, and retrieved denial context.",
         "instructions": [
-          "Generate a professional insurance denial appeal draft.\n\nUse only the provided claim, denial, payer policy, and supporting evidence.\n\nInclude:\n1. Patient/claim context\n2. Denial reason\n3. Relevant policy or clinical evidence\n4. Clear argument for reconsideration\n5. Requested action\n6. Supporting documentation needed\n\nDo not invent patient information, policy rules, codes, dates, or evidence.\nIf required information is missing, clearly mark it as missing."
+          "Generate a professional insurance denial appeal draft.\n\nUse only the provided claim, denial, payer policy, and supporting evidence.\n\nInclude:\n1. Patient/claim context\n2. Denial reason\n3. Relevant policy or clinical evidence\n4. Clear argument for reconsideration\n5. Requested action\n6. Supporting documentation needed\n7. Confidence score (0-100) for this appeal's likelihood of success\n\nDo not invent patient information, policy rules, codes, dates, or evidence.\nIf required information is missing, clearly mark it as missing."
         ],
         "name": "LangChain",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 1360,
-          "y": 400
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 1000, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_langchain_1" }]
+    },
+    {
+      "id": "guardrails_1",
+      "provider": "guardrails",
+      "name": "Human Review Gate",
+      "config": {
+        "profile": "basic",
+        "basic": { "policy_mode": "block" },
+        "name": "Guardrails",
+        "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 1180, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_langchain_2" }]
     },
     {
       "id": "db_postgres_3",
@@ -250,29 +121,21 @@
           "password": "postgres"
         },
         "name": "PostgreSQL",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 1500,
-          "y": 230
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 1360, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "guardrails_1" }]
     },
     {
       "id": "db_postgres_4",
       "provider": "db_postgres",
-      "name": "Recovery Outcome",
+      "name": "Recovery Outcome Tracker",
       "config": {
         "profile": "default",
         "default": {
           "allow_execute": false,
           "database": "denial_recovery",
-          "db_description": "Tracks the payer response and financial recovery outcome for the denial, including approval status, recovered amount, payment reference, and recovery status.",
+          "db_description": "Initializes and tracks the payer response and financial recovery outcome for the denial, including approval status, recovered amount, payment reference, and recovery status.",
           "host": "localhost",
           "max_attempts": 5,
           "table": "payer_responses",
@@ -280,48 +143,10 @@
           "password": "postgres"
         },
         "name": "PostgreSQL",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 1640,
-          "y": 380
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
-    },
-    {
-      "id": "db_postgres_5",
-      "provider": "db_postgres",
-      "name": "Denial Recovery Database",
-      "config": {
-        "profile": "default",
-        "default": {
-          "allow_execute": false,
-          "database": "denial_recovery",
-          "db_description": "Stores and persists denial recovery workflow data in the PostgreSQL database",
-          "host": "localhost",
-          "max_attempts": 5,
-          "table": "appeals",
-          "user": "postgres",
-          "password": "postgres"
-        },
-        "name": "PostgreSQL",
-        "parameters": {
-          "google": {}
-        }
-      },
-      "ui": {
-        "position": {
-          "x": 1800,
-          "y": 220
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 1540, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "db_postgres_3" }]
     },
     {
       "id": "guardrails_2",
@@ -329,31 +154,18 @@
       "name": "Final Submission Guard",
       "config": {
         "profile": "basic",
-        "basic": {
-          "policy_mode": "block"
-        },
+        "basic": { "policy_mode": "block" },
         "name": "Guardrails",
-        "parameters": {
-          "google": {}
-        }
+        "parameters": { "google": {} }
       },
-      "ui": {
-        "position": {
-          "x": 1930,
-          "y": 390
-        },
-        "nodeType": "default",
-        "formDataValid": true
-      }
+      "ui": { "position": { "x": 1720, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "db_postgres_4" }]
     }
   ],
   "project_id": "fac7cb9e-dc55-418c-9ce8-cc2aefe62b32",
   "version": 1,
   "isLocked": false,
   "snapToGrid": true,
-  "snapGridSize": [
-    10,
-    10
-  ],
-  "docRevision": 123
+  "snapGridSize": [10, 10],
+  "docRevision": 124
 }
