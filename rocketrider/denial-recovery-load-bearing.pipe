@@ -4,29 +4,19 @@
       "id": "webhook_1",
       "provider": "webhook",
       "name": "Denial Intake",
-      "config": {
-        "hideForm": true,
-        "mode": "Source",
-        "parameters": {},
-        "type": "webhook",
-        "name": "Webhook"
-      },
-      "ui": { "position": { "x": 100, "y": 300 }, "nodeType": "default", "formDataValid": true }
+      "config": { "hideForm": true, "mode": "Source", "parameters": {}, "type": "webhook", "name": "Webhook" },
+      "ui": { "position": { "x": 80, "y": 400 }, "nodeType": "default", "formDataValid": true }
     },
     {
-      "id": "embedding_transformer_1",
+      "id": "normalize_1",
       "provider": "embedding_transformer",
       "name": "Normalize & Validate",
-      "config": {
-        "profile": "miniLM",
-        "name": "Transformer",
-        "parameters": { "google": {} }
-      },
-      "ui": { "position": { "x": 280, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "config": { "profile": "miniLM", "name": "Transformer", "parameters": { "google": {} } },
+      "ui": { "position": { "x": 260, "y": 400 }, "nodeType": "default", "formDataValid": true },
       "input": [{ "lane": "questions", "from": "webhook_1" }]
     },
     {
-      "id": "llm_ollama_1",
+      "id": "llm_classifier_1",
       "provider": "llm_ollama",
       "name": "Denial Classifier",
       "config": {
@@ -36,136 +26,400 @@
         "name": "Ollama",
         "parameters": { "google": {} }
       },
-      "ui": { "position": { "x": 460, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "embedding_transformer_1" }]
+      "ui": { "position": { "x": 440, "y": 400 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "normalize_1" }]
     },
     {
-      "id": "db_postgres_1",
+      "id": "db_claim_context_1",
       "provider": "db_postgres",
-      "name": "Denial Context Retrieval",
+      "name": "Claim Context Retrieval",
       "config": {
         "profile": "default",
         "default": {
           "allow_execute": false,
           "database": "denial_recovery",
-          "db_description": "PostgreSQL database containing insurance denial records, claims, payer information, denial reasons, appeal history, recovery status, and payment outcomes. Used to retrieve complete denial context for classification, evidence analysis, appeal generation, human review, and recovery tracking.",
-          "host": "localhost",
-          "max_attempts": 5,
-          "table": "denials",
-          "user": "postgres",
-          "password": "postgres"
+          "db_description": "PostgreSQL database containing insurance denial records, claims, payer information, denial reasons, procedure information, patient context, appeal history and recovery information.",
+          "host": "localhost", "max_attempts": 5, "table": "denials", "user": "postgres", "password": "postgres"
         },
-        "name": "PostgreSQL",
-        "parameters": { "google": {} }
+        "name": "PostgreSQL", "parameters": { "google": {} }
       },
-      "ui": { "position": { "x": 640, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "llm_ollama_1" }]
+      "ui": { "position": { "x": 620, "y": 400 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "llm_classifier_1" }]
     },
     {
-      "id": "agent_langchain_1",
+      "id": "embedding_policy_1",
+      "provider": "embedding_transformer",
+      "name": "Policy Query Embedding",
+      "config": { "profile": "miniLM", "name": "Transformer", "parameters": { "google": {} } },
+      "ui": { "position": { "x": 800, "y": 200 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "db_claim_context_1" }]
+    },
+    {
+      "id": "db_policy_vector_1",
+      "provider": "db_postgres",
+      "name": "Payer Policy Vector Retrieval",
+      "config": {
+        "profile": "default",
+        "default": {
+          "allow_execute": false,
+          "database": "denial_recovery",
+          "db_description": "PostgreSQL with pgvector containing chunked payer policies, coverage rules, authorization requirements, medical necessity criteria, coding rules and appeal requirements.",
+          "host": "localhost", "max_attempts": 5, "table": "payer_policy_embeddings", "user": "postgres", "password": "postgres"
+        },
+        "name": "PostgreSQL", "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 980, "y": 200 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "embedding_policy_1" }]
+    },
+    {
+      "id": "agent_policy_rag_1",
       "provider": "agent_langchain",
       "name": "Payer Policy RAG",
       "config": {
-        "agent_description": "Retrieves and analyzes payer-specific policies, coverage rules, denial guidelines, authorization requirements, medical necessity criteria, coding rules, and appeal requirements relevant to an insurance denial. Uses denial context and payer information to identify relevant policy evidence for downstream appeal generation and recovery decisions.",
+        "agent_description": "Retrieves and analyzes payer-specific policies, coverage rules, authorization requirements, medical necessity criteria, coding rules and appeal requirements using the denial context and vector search results.",
         "instructions": [
-          "You are the Payer Policy Research Agent for the Denial Recovery Desk.\n\nAnalyze the incoming denial context and identify the payer, denial reason, denial code, procedure or service, and relevant claim details.\n\nRetrieve and use only relevant payer policy and coverage information available to you.\n\nReturn:\n1. Payer name\n2. Relevant policy or guideline\n3. Applicable coverage or authorization rule\n4. Denial-specific requirement\n5. Evidence supporting or contradicting the denial\n6. Recommended policy-based appeal argument\n7. Source or policy reference when available\n\nDo not invent policy numbers, coverage rules, citations, or evidence. If relevant policy information is unavailable, explicitly state that it is unavailable.\n\nPrioritize accurate, denial-specific evidence over generic healthcare information."
+          "You are the Payer Policy Research Agent for the Denial Recovery Desk.",
+          "Analyze the incoming denial context.",
+          "Identify payer name, denial reason, denial code, procedure, service and claim details.",
+          "Use only relevant payer policy information returned by the retrieval system.",
+          "Do not invent policy numbers, citations, coverage rules or evidence.",
+          "Return payer name.",
+          "Return relevant policy or guideline.",
+          "Return applicable coverage or authorization rule.",
+          "Return denial-specific requirement.",
+          "Return evidence supporting or contradicting the denial.",
+          "Return a recommended policy-based appeal argument.",
+          "Return source or policy reference when available.",
+          "If policy information is unavailable, explicitly state that it is unavailable."
         ],
-        "name": "LangChain",
-        "parameters": { "google": {} }
+        "name": "LangChain", "parameters": { "google": {} }
       },
-      "ui": { "position": { "x": 820, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "db_postgres_1" }]
+      "ui": { "position": { "x": 1160, "y": 200 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "db_policy_vector_1" }]
     },
     {
-      "id": "agent_langchain_2",
+      "id": "agent_evidence_1",
+      "provider": "agent_langchain",
+      "name": "Evidence Analyzer",
+      "config": {
+        "agent_description": "Analyzes claim context, denial information, payer policy and available supporting evidence to determine whether an appeal can be safely generated.",
+        "instructions": [
+          "Compare the denial reason against the available claim evidence.",
+          "Verify whether the payer policy supports or contradicts the denial.",
+          "Identify missing documentation.",
+          "Identify supporting evidence.",
+          "Identify contradictory evidence.",
+          "Check whether required authorization information is present.",
+          "Check whether required clinical documentation is present.",
+          "Check coding and procedure consistency.",
+          "Calculate an evidence completeness score from 0 to 100.",
+          "Set evidence_status to sufficient when evidence completeness is 80 or higher.",
+          "Set evidence_status to insufficient when evidence completeness is below 80.",
+          "Never invent missing documentation or clinical evidence."
+        ],
+        "name": "LangChain", "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 1340, "y": 200 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_policy_rag_1" }]
+    },
+    {
+      "id": "router_evidence_1",
+      "provider": "conditional_router",
+      "name": "Evidence Sufficiency Router",
+      "config": {
+        "name": "Conditional Router",
+        "conditions": [
+          { "id": "evidence_sufficient", "output": "sufficient", "expression": "evidence_status == 'sufficient' && evidence_completeness >= 80" },
+          { "id": "evidence_insufficient", "output": "insufficient", "expression": "evidence_status == 'insufficient' || evidence_completeness < 80" }
+        ],
+        "default_output": "insufficient"
+      },
+      "ui": { "position": { "x": 1520, "y": 200 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_evidence_1" }]
+    },
+    {
+      "id": "agent_missing_docs_1",
+      "provider": "agent_langchain",
+      "name": "Missing Document Analyzer",
+      "config": {
+        "agent_description": "Creates a structured list of missing documentation required to support the denial appeal.",
+        "instructions": [
+          "Review the evidence analysis.",
+          "Identify every missing document required for appeal.",
+          "Group missing documents into clinical, authorization, coding, billing and payer-specific documentation.",
+          "Prioritize documents by importance.",
+          "Do not invent documents that are not required.",
+          "Return a structured document collection checklist."
+        ],
+        "name": "LangChain", "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 1700, "y": 80 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "insufficient", "from": "router_evidence_1" }]
+    },
+    {
+      "id": "human_document_review_1",
+      "provider": "human_review",
+      "name": "Document Collection Review",
+      "config": {
+        "review_mode": "manual", "approval_required": true, "name": "Human Review",
+        "instructions": [
+          "Review the missing-document checklist.",
+          "Upload or attach available documentation.",
+          "Confirm whether enough evidence is now available.",
+          "Reject fabricated or unsupported evidence."
+        ]
+      },
+      "ui": { "position": { "x": 1880, "y": 80 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_missing_docs_1" }]
+    },
+    {
+      "id": "agent_appeal_1",
       "provider": "agent_langchain",
       "name": "Appeal Generator",
       "config": {
-        "agent_description": "Generates an evidence-based appeal draft using the denial reason, claim data, payer policy, and retrieved denial context.",
+        "agent_description": "Generates a professional evidence-based insurance denial appeal using verified claim data, denial information, payer policy and supporting evidence.",
         "instructions": [
-          "Generate a professional insurance denial appeal draft.\n\nUse only the provided claim, denial, payer policy, and supporting evidence.\n\nInclude:\n1. Patient/claim context\n2. Denial reason\n3. Relevant policy or clinical evidence\n4. Clear argument for reconsideration\n5. Requested action\n6. Supporting documentation needed\n7. Confidence score (0-100) for this appeal's likelihood of success\n\nDo not invent patient information, policy rules, codes, dates, or evidence.\nIf required information is missing, clearly mark it as missing."
+          "Generate a professional insurance denial appeal draft.",
+          "Use only verified claim, denial, payer policy and supporting evidence.",
+          "Include patient or claim context without exposing unnecessary sensitive information.",
+          "Include denial reason.",
+          "Include relevant payer policy.",
+          "Include clinical or operational evidence.",
+          "Explain why the denial should be reconsidered.",
+          "Include the requested payer action.",
+          "List supporting documentation.",
+          "Clearly mark missing information.",
+          "Do not invent patient information.",
+          "Do not invent policy numbers.",
+          "Do not invent codes.",
+          "Do not invent dates.",
+          "Do not invent clinical evidence.",
+          "Do not generate the final success probability. That will be calculated by the Critic Agent."
         ],
-        "name": "LangChain",
-        "parameters": { "google": {} }
+        "name": "LangChain", "parameters": { "google": {} }
       },
-      "ui": { "position": { "x": 1000, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "agent_langchain_1" }]
+      "ui": { "position": { "x": 1700, "y": 400 }, "nodeType": "default", "formDataValid": true },
+      "input": [
+        { "lane": "sufficient", "from": "router_evidence_1" },
+        { "lane": "questions", "from": "human_document_review_1" }
+      ]
     },
     {
-      "id": "guardrails_1",
-      "provider": "guardrails",
-      "name": "Human Review Gate",
+      "id": "agent_critic_1",
+      "provider": "agent_langchain",
+      "name": "Appeal Critic",
       "config": {
-        "profile": "basic",
-        "basic": { "policy_mode": "block" },
-        "name": "Guardrails",
-        "parameters": { "google": {} }
+        "agent_description": "Critically evaluates the generated appeal for factual accuracy, evidence coverage, policy alignment, completeness and unsupported claims.",
+        "instructions": [
+          "Review the generated appeal against the original denial.",
+          "Verify every major claim against available evidence.",
+          "Verify payer policy references.",
+          "Identify unsupported statements.",
+          "Identify missing evidence.",
+          "Check whether the requested action is appropriate.",
+          "Check whether the appeal addresses the actual denial reason.",
+          "Return factual_accuracy_score from 0 to 100.",
+          "Return evidence_alignment_score from 0 to 100.",
+          "Return policy_alignment_score from 0 to 100.",
+          "Return completeness_score from 0 to 100.",
+          "Return overall_score from 0 to 100.",
+          "Return critic_status as approved when overall_score is 85 or higher.",
+          "Return critic_status as revise when overall_score is below 85.",
+          "Never approve fabricated evidence."
+        ],
+        "name": "LangChain", "parameters": { "google": {} }
       },
-      "ui": { "position": { "x": 1180, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "agent_langchain_2" }]
+      "ui": { "position": { "x": 1880, "y": 400 }, "nodeType": "default", "formDataValid": true },
+      "input": [
+        { "lane": "questions", "from": "agent_appeal_1" },
+        { "lane": "questions", "from": "agent_appeal_revision_1" }
+      ]
     },
     {
-      "id": "db_postgres_3",
+      "id": "router_critic_1",
+      "provider": "conditional_router",
+      "name": "Appeal Quality Router",
+      "config": {
+        "name": "Conditional Router",
+        "conditions": [
+          { "id": "critic_approved", "output": "approved", "expression": "critic_status == 'approved' && overall_score >= 85" },
+          { "id": "critic_revise", "output": "revise", "expression": "critic_status == 'revise' || overall_score < 85" }
+        ],
+        "default_output": "revise"
+      },
+      "ui": { "position": { "x": 2060, "y": 400 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_critic_1" }]
+    },
+    {
+      "id": "agent_appeal_revision_1",
+      "provider": "agent_langchain",
+      "name": "Appeal Revision Agent",
+      "config": {
+        "agent_description": "Revises an appeal using the Critic Agent feedback while preserving factual accuracy.",
+        "instructions": [
+          "Review the previous appeal.",
+          "Review every critic finding.",
+          "Fix unsupported statements.",
+          "Improve evidence alignment.",
+          "Correct policy alignment issues.",
+          "Add missing required information only when it exists in the supplied evidence.",
+          "Do not invent facts.",
+          "Do not invent policy citations.",
+          "Return a revised appeal draft."
+        ],
+        "name": "LangChain", "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 2240, "y": 540 }, "nodeType": "default", "formDataValid": true },
+      "input": [
+        { "lane": "revise", "from": "router_critic_1" },
+        { "lane": "revision_required", "from": "router_human_approval_1" }
+      ]
+    },
+    {
+      "id": "agent_confidence_1",
+      "provider": "agent_langchain",
+      "name": "Appeal Confidence Scorer",
+      "config": {
+        "agent_description": "Calculates a transparent appeal readiness score from evidence and quality signals.",
+        "instructions": [
+          "Calculate appeal readiness from the supplied verified evidence.",
+          "Use evidence completeness as a major factor.",
+          "Use factual accuracy.",
+          "Use policy alignment.",
+          "Use documentation completeness.",
+          "Use denial-specific relevance.",
+          "Return a confidence score from 0 to 100.",
+          "Return confidence_reasons.",
+          "Return missing_risks.",
+          "Do not claim that the score guarantees payer approval.",
+          "The score represents appeal readiness, not guaranteed payment."
+        ],
+        "name": "LangChain", "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 2240, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "approved", "from": "router_critic_1" }]
+    },
+    {
+      "id": "router_confidence_1",
+      "provider": "conditional_router",
+      "name": "Appeal Readiness Router",
+      "config": {
+        "name": "Conditional Router",
+        "conditions": [
+          { "id": "ready_for_human", "output": "ready", "expression": "confidence_score >= 80" },
+          { "id": "needs_review", "output": "review", "expression": "confidence_score < 80" }
+        ],
+        "default_output": "review"
+      },
+      "ui": { "position": { "x": 2420, "y": 300 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "agent_confidence_1" }]
+    },
+    {
+      "id": "human_review_1",
+      "provider": "human_review",
+      "name": "Human Appeal Approval",
+      "config": {
+        "review_mode": "manual", "approval_required": true, "name": "Human Review",
+        "instructions": [
+          "Review the complete denial context.",
+          "Review payer policy evidence.",
+          "Review supporting documentation.",
+          "Review the generated appeal.",
+          "Review Critic Agent findings.",
+          "Review appeal readiness score.",
+          "Approve only if the appeal is factually supported.",
+          "Reject or request revision when evidence is insufficient.",
+          "Human approval is mandatory before submission."
+        ]
+      },
+      "ui": { "position": { "x": 2600, "y": 340 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "review", "from": "router_confidence_1" }]
+    },
+    {
+      "id": "router_human_approval_1",
+      "provider": "conditional_router",
+      "name": "Human Approval Router",
+      "config": {
+        "name": "Conditional Router",
+        "conditions": [
+          { "id": "human_approved", "output": "approved", "expression": "human_decision == 'approved'" },
+          { "id": "human_rejected", "output": "rejected", "expression": "human_decision == 'rejected'" },
+          { "id": "human_revision", "output": "revision_required", "expression": "human_decision == 'revision_required'" }
+        ],
+        "default_output": "rejected"
+      },
+      "ui": { "position": { "x": 2780, "y": 340 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "human_review_1" }]
+    },
+    {
+      "id": "db_save_appeal_1",
       "provider": "db_postgres",
-      "name": "Save Appeal",
+      "name": "Save Approved Appeal",
       "config": {
         "profile": "default",
         "default": {
           "allow_execute": false,
           "database": "denial_recovery",
-          "db_description": "Stores the generated appeal and its associated denial information in the Denial Recovery database for human review, audit tracking, and recovery workflow management.",
-          "host": "localhost",
-          "max_attempts": 5,
-          "table": "appeals",
-          "user": "postgres",
-          "password": "postgres"
+          "db_description": "Stores generated and human-approved insurance appeals, their evidence, review decisions, audit information and workflow status.",
+          "host": "localhost", "max_attempts": 5, "table": "appeals", "user": "postgres", "password": "postgres"
         },
-        "name": "PostgreSQL",
-        "parameters": { "google": {} }
+        "name": "PostgreSQL", "parameters": { "google": {} }
       },
-      "ui": { "position": { "x": 1360, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "guardrails_1" }]
+      "ui": { "position": { "x": 2960, "y": 260 }, "nodeType": "default", "formDataValid": true },
+      "input": [
+        { "lane": "ready", "from": "router_confidence_1" },
+        { "lane": "approved", "from": "router_human_approval_1" }
+      ]
     },
     {
-      "id": "db_postgres_4",
-      "provider": "db_postgres",
-      "name": "Recovery Outcome Tracker",
-      "config": {
-        "profile": "default",
-        "default": {
-          "allow_execute": false,
-          "database": "denial_recovery",
-          "db_description": "Initializes and tracks the payer response and financial recovery outcome for the denial, including approval status, recovered amount, payment reference, and recovery status.",
-          "host": "localhost",
-          "max_attempts": 5,
-          "table": "payer_responses",
-          "user": "postgres",
-          "password": "postgres"
-        },
-        "name": "PostgreSQL",
-        "parameters": { "google": {} }
-      },
-      "ui": { "position": { "x": 1540, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "db_postgres_3" }]
-    },
-    {
-      "id": "guardrails_2",
+      "id": "guardrails_submission_1",
       "provider": "guardrails",
       "name": "Final Submission Guard",
       "config": {
-        "profile": "basic",
-        "basic": { "policy_mode": "block" },
-        "name": "Guardrails",
-        "parameters": { "google": {} }
+        "profile": "basic", "basic": { "policy_mode": "block" }, "name": "Guardrails", "parameters": { "google": {} },
+        "rules": [
+          "Block submission when human approval is missing.",
+          "Block submission when required claim fields are missing.",
+          "Block submission when unsupported policy claims are detected.",
+          "Block submission when appeal confidence is below the configured threshold.",
+          "Block submission when PHI validation fails.",
+          "Block submission when payer information is missing."
+        ]
       },
-      "ui": { "position": { "x": 1720, "y": 300 }, "nodeType": "default", "formDataValid": true },
-      "input": [{ "lane": "questions", "from": "db_postgres_4" }]
-    }
-  ],
-  "project_id": "fac7cb9e-dc55-418c-9ce8-cc2aefe62b32",
-  "version": 1,
-  "isLocked": false,
-  "snapToGrid": true,
-  "snapGridSize": [10, 10],
-  "docRevision": 124
-}
+      "ui": { "position": { "x": 3140, "y": 220 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "db_save_appeal_1" }]
+    },
+    {
+      "id": "submission_1",
+      "provider": "webhook",
+      "name": "Appeal Submission",
+      "config": {
+        "hideForm": true, "mode": "Target",
+        "parameters": { "submission_type": "payer_appeal", "requires_human_approval": true },
+        "type": "webhook", "name": "Payer Submission"
+      },
+      "ui": { "position": { "x": 3320, "y": 220 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "guardrails_submission_1" }]
+    },
+    {
+      "id": "db_payer_response_1",
+      "provider": "db_postgres",
+      "name": "Payer Response Tracker",
+      "config": {
+        "profile": "default",
+        "default": {
+          "allow_execute": false, "database": "denial_recovery",
+          "db_description": "Tracks payer submission responses, appeal status, response dates, payment status and payer reference information.",
+          "host": "localhost", "max_attempts": 5, "table": "payer_responses", "user": "postgres", "password": "postgres"
+        },
+        "name": "PostgreSQL", "parameters": { "google": {} }
+      },
+      "ui": { "position": { "x": 3500, "y": 220 }, "nodeType": "default", "formDataValid": true },
+      "input": [{ "lane": "questions", "from": "submission_1" }]
+    },
+    {
+      "id": "db_recovery_tracker_1",
+      "provider": "db_postgres",
+      "name": "Recovery Outcome Tracker",
+      "config": {
+        "profile":
